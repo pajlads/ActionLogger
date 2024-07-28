@@ -1,0 +1,70 @@
+name: Build with Gradle
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gradle:
+    strategy:
+      matrix:
+        #os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
+        # others = slow
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+      - uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4.2.1
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@db19848a5fa7950289d3668fb053140cf3028d43 # v3.3.2
+
+      - name: Execute Gradle build
+        run: ./gradlew build
+
+      - name: Build shadowJar
+        run: ./gradlew shadowJar
+
+      - name: Upload shadowJar
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+        with:
+          name: plugin-shadow
+          path: build/libs/*-*-all.jar
+
+  create-release:
+    needs: gradle
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+
+    steps:
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: plugin-shadow
+          path: release-artifacts/
+      - name: Create release
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
+        with:
+          removeArtifacts: true
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifacts: "release-artifacts/*"
+          body: |
+            This release should only be used if testing one of the features that have not made it to the plugin hub yet.
+
+            Note: To use this build, you must run from terminal (or command prompt): `java -ea -jar actionlogger-*-all.jar` (be sure to specify the correct version and path to the file). Also, very recent java versions may require [additional VM options](https://github.com/runelite/runelite/wiki/Building-with-IntelliJ-IDEA#jdks-16).
+
+            Latest Change:
+
+            ${{ github.event.head_commit.message }}
+          prerelease: true
+          name: Nightly Release
+          tag: nightly-build
