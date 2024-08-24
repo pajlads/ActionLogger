@@ -1,8 +1,8 @@
 package actionlogger.trackers;
 
 import actionlogger.writers.JsonWriter;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.client.eventbus.Subscribe;
@@ -14,7 +14,10 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor
 public class VarTracker {
-    private final static Set<Integer> IGNORED_VARBITS = Set.of(1, 2, 3);
+    private static final String VARB_TYPE = "VARBIT_CHANGED";
+    private static final String VARP_TYPE = "VARPLAYER_CHANGED";
+
+    private static final Set<Integer> IGNORED_VARBITS = Set.of(1, 2, 3);
     private static final Set<Integer> IGNORED_VARPS = Set.of(1, 2, 3);
 
     private final JsonWriter writer;
@@ -27,56 +30,30 @@ public class VarTracker {
 
         if (id == -1) {
             // varp changed
-            this.handleVarplayerChanged(event, event.getVarpId());
+            this.handleChange(event.getVarpId(), event.getValue(), IGNORED_VARPS, varps, VARP_TYPE);
         } else {
             // varbit changed
-            this.handleVarbitChanged(event, id);
+            this.handleChange(id, event.getValue(), IGNORED_VARBITS, varbits, VARB_TYPE);
         }
     }
 
-    private void handleVarplayerChanged(VarbitChanged event, int id) {
-        if (IGNORED_VARPS.contains(id)) {
+    private void handleChange(int id, int value, Set<Integer> ignored, Map<Integer, Integer> map, String type) {
+        if (ignored.contains(id)) {
             return;
         }
 
-        var prevValue = varps.getOrDefault(id, 0);
-        var value = event.getValue();
-        varps.put(id, value);
+        var previous = map.put(id, value);
+        var prevValue = previous != null ? previous : 0;
 
         if (prevValue != value) {
-            this.writer.write(VarplayerChangedData.TYPE, new VarplayerChangedData(id, prevValue, value));
+            this.writer.write(type, new VarChangedData(id, prevValue, value));
         }
     }
 
-    private void handleVarbitChanged(VarbitChanged event, int id) {
-        if (IGNORED_VARBITS.contains(id)) {
-            return;
-        }
-
-        var prevValue = varbits.getOrDefault(id, 0);
-        var value = event.getValue();
-        varbits.put(id, value);
-
-        if (prevValue != value) {
-            this.writer.write(VarbitChangedData.TYPE, new VarbitChangedData(id, prevValue, value));
-        }
-    }
-
-    @Data
-    static private class VarplayerChangedData {
-        private static final String TYPE = "VARPLAYER_CHANGED";
-
-        private final Integer id;
-        private final Integer oldValue;
-        private final Integer newValue;
-    }
-
-    @Data
-    static private class VarbitChangedData {
-        private static final String TYPE = "VARBIT_CHANGED";
-
-        private final Integer id;
-        private final Integer oldValue;
-        private final Integer newValue;
+    @Value
+    private static class VarChangedData {
+        int id;
+        int oldValue;
+        int newValue;
     }
 }
