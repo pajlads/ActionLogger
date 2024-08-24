@@ -6,18 +6,14 @@ import actionlogger.writers.JsonWriter;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
-import net.runelite.client.RuneLite;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
+import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
 @PluginDescriptor(name = "Action Logger", description = "Log user & server actions to disk", tags = {"actionlogger"})
@@ -26,22 +22,15 @@ public class ActionLoggerPlugin extends Plugin {
     private @Inject EventBus eventBus;
     private @Inject Client client;
     private @Inject Gson gson;
+    private @Inject ScheduledExecutorService executor;
 
     private DialogueTracker dialogueTracker = null;
     private VarTracker varTracker = null;
-    private FileOutputStream fh = null;
     private JsonWriter writer = null;
 
     @Override
-    protected void startUp() throws FileNotFoundException {
-        var dir = new File(RuneLite.RUNELITE_DIR, "action-logger");
-        //noinspection ResultOfMethodCallIgnored
-        dir.mkdir();
-
-        var path = Path.of(dir.getPath()).resolve(String.format("%d-logs.txt", System.currentTimeMillis())).toString();
-        fh = new FileOutputStream(path);
-
-        writer = new JsonWriter(gson, client, fh);
+    protected void startUp() throws IOException {
+        writer = new JsonWriter(gson, client, executor);
 
         dialogueTracker = new DialogueTracker(writer, client);
         eventBus.register(dialogueTracker);
@@ -62,13 +51,8 @@ public class ActionLoggerPlugin extends Plugin {
         eventBus.unregister(varTracker);
         varTracker = null;
 
+        writer.close();
         writer = null;
-
-        if (fh != null) {
-            fh.flush();
-            fh.close();
-            fh = null;
-        }
 
         log.debug("Shut down Action Logger");
     }
