@@ -52,18 +52,6 @@ tasks.withType<JavaCompile> {
     targetCompatibility = version
 }
 
-tasks.test {
-    useJUnitPlatform {
-        excludeTags("generator")
-    }
-}
-
-tasks.register(name = "generateResources", type = Test::class) {
-    useJUnitPlatform {
-        includeTags("generator")
-    }
-}
-
 tasks.withType<AbstractArchiveTask>().configureEach {
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
