@@ -1,7 +1,9 @@
 package actionlogger.trackers;
 
 import actionlogger.writers.JsonWriter;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
@@ -25,6 +27,9 @@ import static java.awt.event.KeyEvent.*;
 @Slf4j
 @RequiredArgsConstructor
 public class DialogueTracker implements KeyListener {
+    private static final String DIALOGUE_STARTED = "DIALOGUE_STARTED";
+    private static final String DIALOGUE_ENDED = "DIALOGUE_ENDED";
+
     private final JsonWriter writer;
     private final Client client;
     private @Nullable DialogueEndedData dialogueEndedData = null;
@@ -105,7 +110,7 @@ public class DialogueTracker implements KeyListener {
 
         var playerPosition = localPlayer.getWorldLocation();
 
-        this.writer.write(DialogueStartedData.TYPE, new DialogueStartedData(actorName, actorID, lastInteractedNpcName, lastInteractedNpcID, lastInteractedNpcPosition, playerPosition, text, options));
+        this.writer.write(DIALOGUE_STARTED, new DialogueStartedData(actorName, actorID, lastInteractedNpcName, lastInteractedNpcID, lastInteractedNpcPosition, playerPosition, text, options));
 
         this.dialogueEndedData = new DialogueEndedData(actorName, actorID, lastInteractedNpcName, lastInteractedNpcID, lastInteractedNpcPosition, playerPosition, text, options);
 
@@ -116,7 +121,7 @@ public class DialogueTracker implements KeyListener {
     private void endDialogue() {
         assert this.dialogueEndedData != null;
 
-        this.writer.write(DialogueEndedData.TYPE, this.dialogueEndedData);
+        this.writer.write(DIALOGUE_ENDED, this.dialogueEndedData);
 
         this.dialogueEndedData = null;
     }
@@ -216,24 +221,20 @@ public class DialogueTracker implements KeyListener {
     }
 
 
-    @RequiredArgsConstructor
+    @Value
     private static class DialogueStartedData {
-        public static final String TYPE = "DIALOGUE_STARTED";
-
-        private final String actorName;
-        private final Integer actorID;
-        private final String lastInteractedName;
-        private final Integer lastInteractedID;
-        private final WorldPoint lastInteractedPosition;
-        private final WorldPoint playerPosition;
-        private final String dialogueText;
-        private final List<String> dialogueOptions;
+        String actorName;
+        Integer actorID;
+        String lastInteractedName;
+        Integer lastInteractedID;
+        WorldPoint lastInteractedPosition;
+        WorldPoint playerPosition;
+        String dialogueText;
+        List<String> dialogueOptions;
     }
 
-    @RequiredArgsConstructor
+    @Data
     private static class DialogueEndedData {
-        public static final String TYPE = "DIALOGUE_ENDED";
-
         private final String actorName;
         private final Integer actorID;
         private final String lastInteractedName;
