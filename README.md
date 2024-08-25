@@ -13,8 +13,8 @@ Fires when a dialogue is opened
 
 ```json5
 {
-  "tickCount": 95,
-  "timestamp": "2024-08-24 13:23:19.312",
+  "tick": 95,
+  "ts": "2024-08-24 13:23:19.312",
   "type": "DIALOGUE_STARTED",
   "data": {
     "actorName": "pajdenk",
@@ -51,8 +51,8 @@ Where possible, the `dialogueOptionChosen` will be filled in with information ab
 
 ```json5
 {
-  "tickCount": 101,
-  "timestamp": "2024-08-24 13:23:22.912",
+  "tick": 101,
+  "ts": "2024-08-24 13:23:22.912",
   "type": "DIALOGUE_ENDED",
   "data": {
     "actorName": "pajdenk",
@@ -90,8 +90,8 @@ You can Inspect the Varbit in Chisel, e.g. https://chisel.weirdgloop.org/varbs/d
 
 ```json5
 {
-  "tickCount": 104,
-  "timestamp": "2024-08-24 13:23:24.692",
+  "tick": 104,
+  "ts": "2024-08-24 13:23:24.692",
   "type": "VARBIT_CHANGED",
   "data": {
     // ID of the Varbit being changed
@@ -110,8 +110,8 @@ You can Inspect the Varplayer in Chisel, e.g. https://chisel.weirdgloop.org/varb
 
 ```json5
 {
-  "tickCount": 0,
-  "timestamp": "2024-08-24 13:22:22.092",
+  "tick": 0,
+  "ts": "2024-08-24 13:22:22.092",
   "type": "VARPLAYER_CHANGED",
   "data": {
     // ID of the Varplayer being changed
