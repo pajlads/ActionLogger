@@ -54,8 +54,8 @@ public class JsonWriter implements Closeable {
 
     @Value
     private static class Payload {
-        int tickCount;
-        String timestamp;
+        int tick;
+        String ts;
         String type;
         Object data;
     }
