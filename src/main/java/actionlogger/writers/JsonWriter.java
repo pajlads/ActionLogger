@@ -41,6 +41,7 @@ public class JsonWriter implements Closeable {
             try {
                 fh.write(gson.toJson(payload));
                 fh.newLine();
+                fh.flush();
             } catch (IOException e) {
                 log.warn("Failed to write DialogueTracker data: {}", e.getMessage());
             }
