@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ClientShutdown;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -55,5 +57,14 @@ public class ActionLoggerPlugin extends Plugin {
         writer = null;
 
         log.debug("Shut down Action Logger");
+    }
+
+    @Subscribe
+    protected void onClientShutdown(ClientShutdown event) {
+        try {
+            writer.close();
+        } catch (Exception e) {
+            log.warn("Failed to close writer", e);
+        }
     }
 }
