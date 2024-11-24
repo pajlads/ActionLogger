@@ -121,3 +121,47 @@ You can Inspect the Varplayer in Chisel, e.g. https://chisel.weirdgloop.org/varb
   }
 }
 ```
+
+### INVENTORY_CHANGED
+
+Fires when the player's inventory changes
+
+#### User picked up a cabbage into the first slot
+
+```json5
+{
+  "tick": 0,
+  "ts": "2024-08-25T08:59:42Z",
+  "type": "INVENTORY_CHANGED",
+  "data": {
+    "oldInventory": [
+      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    ],
+    "newInventory": [
+      1965, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    ]
+  }
+}
+```
+
+#### User moved the cabbage from the first slot to the last slot
+
+```json5
+{
+  "tick": 0,
+  "ts": "2024-08-25T08:59:42Z",
+  "type": "INVENTORY_CHANGED",
+  "data": {
+    "newInventory": [
+      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    ],
+    "oldInventory": [
+      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+      -1, -1, -1, -1, -1, -1, -1, -1, -1, 1965
+    ]
+  }
+}
+```
