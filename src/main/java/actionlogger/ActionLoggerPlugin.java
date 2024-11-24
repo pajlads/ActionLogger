@@ -1,6 +1,7 @@
 package actionlogger;
 
 import actionlogger.trackers.DialogueTracker;
+import actionlogger.trackers.InventoryTracker;
 import actionlogger.trackers.VarTracker;
 import actionlogger.writers.JsonWriter;
 import com.google.gson.Gson;
@@ -28,6 +29,7 @@ public class ActionLoggerPlugin extends Plugin {
 
     private DialogueTracker dialogueTracker = null;
     private VarTracker varTracker = null;
+    private InventoryTracker inventoryTracker = null;
     private JsonWriter writer = null;
 
     @Override
@@ -41,6 +43,9 @@ public class ActionLoggerPlugin extends Plugin {
         varTracker = new VarTracker(writer);
         eventBus.register(varTracker);
 
+        inventoryTracker = new InventoryTracker(writer);
+        eventBus.register(inventoryTracker);
+
         log.debug("Started up Action Logger");
     }
 
@@ -52,6 +57,9 @@ public class ActionLoggerPlugin extends Plugin {
 
         eventBus.unregister(varTracker);
         varTracker = null;
+
+        eventBus.unregister(inventoryTracker);
+        inventoryTracker = null;
 
         writer.close();
         writer = null;
