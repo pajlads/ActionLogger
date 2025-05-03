@@ -32,21 +32,10 @@ public class InventoryTracker {
         var itemIDs = Arrays.stream(items).mapToInt(Item::getId).toArray();
         var itemQuantities = Arrays.stream(items).mapToInt(Item::getQuantity).toArray();
 
-        boolean idChanged = inventoryItemIDs.length != itemIDs.length;
-        boolean quantityChanged = false;
-        final int n = Math.min(inventoryItemIDs.length, itemIDs.length);
-        for (int i = 0; i < n; i++) {
-            if (inventoryItemIDs[i] != itemIDs[i]) {
-                idChanged = true;
-            } else if (inventoryQuantities[i] != itemQuantities[i]) {
-                quantityChanged = true;
-            }
-        }
-
-        if (idChanged || quantityChanged) {
+        if (!Arrays.equals(inventoryItemIDs, itemIDs) || !Arrays.equals(inventoryQuantities, itemQuantities)) {
             var data = new InventoryChangedData(
-                idChanged ? this.inventoryItemIDs : null,
-                quantityChanged ? this.inventoryQuantities : null,
+                this.inventoryItemIDs,
+                this.inventoryQuantities,
                 itemIDs,
                 itemQuantities
             );
