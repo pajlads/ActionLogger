@@ -7,6 +7,9 @@ import actionlogger.writers.JsonWriter;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.events.CommandExecuted;
+import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ClientShutdown;
@@ -14,8 +17,8 @@ import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
@@ -26,6 +29,7 @@ public class ActionLoggerPlugin extends Plugin {
     private @Inject Client client;
     private @Inject Gson gson;
     private @Inject ScheduledExecutorService executor;
+    private @Inject ChatMessageManager chatManager;
 
     private DialogueTracker dialogueTracker = null;
     private VarTracker varTracker = null;
@@ -33,7 +37,7 @@ public class ActionLoggerPlugin extends Plugin {
     private JsonWriter writer = null;
 
     @Override
-    protected void startUp() throws IOException {
+    protected void startUp() {
         writer = new JsonWriter(gson, client, executor);
 
         dialogueTracker = new DialogueTracker(writer, client);
@@ -50,7 +54,7 @@ public class ActionLoggerPlugin extends Plugin {
     }
 
     @Override
-    protected void shutDown() throws IOException {
+    protected void shutDown() {
         keyManager.unregisterKeyListener(dialogueTracker);
         eventBus.unregister(dialogueTracker);
         dialogueTracker = null;
@@ -68,11 +72,48 @@ public class ActionLoggerPlugin extends Plugin {
     }
 
     @Subscribe
+    public void onCommandExecuted(CommandExecuted event) {
+        var usage = "Usage: ::ActionLogger <COMMAND>. Available commands: restart";
+        var cmd = event.getCommand();
+        var args = event.getArguments();
+        if ("ActionLogger".equalsIgnoreCase(cmd) || "ActLog".equalsIgnoreCase(cmd)) {
+            if (args == null || args.length == 0) {
+                this.addChatMessage(usage);
+                return;
+            }
+
+            switch (args[0].toLowerCase()) {
+                case "restart":
+                    var oldPath = this.writer.getPath();
+                    this.writer.restartFile();
+                    var newPath = this.writer.getPath();
+                    this.addChatMessage(String.format("Closed file at %s, now writing to %s", oldPath, newPath));
+                    break;
+
+                default:
+                    this.addChatMessage(String.format("Unknown command %s", args[0]));
+                    this.addChatMessage(usage);
+                    break;
+            }
+        }
+    }
+
+    @Subscribe
     protected void onClientShutdown(ClientShutdown event) {
         try {
             writer.close();
         } catch (Exception e) {
             log.warn("Failed to close writer", e);
         }
+    }
+
+    void addChatMessage(@Nonnull String message) {
+        String formatted = String.format("[ActionLogger] %s", message);
+
+        chatManager.queue(QueuedMessage.builder()
+            .type(ChatMessageType.CONSOLE)
+            .runeLiteFormattedMessage(formatted)
+            .build()
+        );
     }
 }
