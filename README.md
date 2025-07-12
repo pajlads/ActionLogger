@@ -206,42 +206,65 @@ Example output:
 
 ```json
 {
-  "tick": 1449,
-  "ts": "2025-07-12T14:08:59Z",
+  "tick": 26,
+  "ts": "2025-07-12T14:43:21Z",
   "type": "DUMP",
   "data": {
     "scene": {
-      "baseX": 3152,
-      "baseY": 3160,
+      "baseX": 3184,
+      "baseY": 3168,
       "isInstance": false
     },
-    "worldViewPlane": 1,
+    "worldViewPlane": 0,
     "groundItems": [
       {
-        "x": 42,
-        "y": 41,
+        "x": 24,
+        "y": 46,
         "z": 0,
-        "id": 526,
-        "name": "Bones",
+        "id": 1923,
+        "name": "Bowl",
         "quantity": 1
       }
     ],
-    "objects": [
+    "decorativeObjects": [
+      {
+        "x": 7,
+        "y": 102,
+        "z": 0,
+        "id": 3474
+      }
+    ],
+    "wallObjects": [
       {
         "x": 1,
-        "y": 1,
+        "y": 38,
         "z": 0,
-        "id": 4737,
-        "type": "GROUND"
+        "id": 980
+      }
+    ],
+    "gameObjects": [
+      {
+        "x": 1,
+        "y": 9,
+        "z": 0,
+        "id": 1162
+      }
+    ],
+    "groundObjects": [
+      {
+        "x": 1,
+        "y": 10,
+        "z": 0,
+        "id": 1272
       }
     ],
     "npcs": [
       {
-        "x": 56,
-        "y": 60,
-        "z": 1,
-        "id": 3106,
-        "name": "Man"
+        "x": 60,
+        "y": 52,
+        "z": 0,
+        "id": 1838,
+        "name": "Duck"
       }
     ]
   }
