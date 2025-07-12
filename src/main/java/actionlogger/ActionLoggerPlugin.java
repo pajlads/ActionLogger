@@ -6,6 +6,7 @@ import actionlogger.trackers.VarTracker;
 import actionlogger.writers.JsonWriter;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.events.CommandExecuted;
 import net.runelite.client.chat.ChatMessageManager;
