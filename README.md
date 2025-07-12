@@ -203,6 +203,7 @@ To dump NPCs only: `::actlog dump npcs`
 To dump NPCs and ground items only: `::actlog dump npcs grounditems`
 
 Example output:
+
 ```json
 {
   "tick": 1449,
