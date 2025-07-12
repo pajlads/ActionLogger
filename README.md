@@ -181,3 +181,15 @@ Fires when the player's inventory changes
   }
 }
 ```
+
+## Chat commands
+
+There are various helpful chat commands available when the Action Logger plugin is installed.
+
+To invoke a command, type `::ActionLogger <COMMAND>` or `::ActLog <COMMAND>` with a command listed below
+
+### Restart
+
+Ends the logging of the current file and starts logging to a new file.
+
+Example: `::actlog restart`
