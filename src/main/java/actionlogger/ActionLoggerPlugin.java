@@ -26,6 +26,8 @@ import java.util.concurrent.ScheduledExecutorService;
 @Slf4j
 @PluginDescriptor(name = "Action Logger", description = "Log user & server actions to disk", tags = {"actionlogger"})
 public class ActionLoggerPlugin extends Plugin {
+    private static final String USAGE = "Usage: ::ActionLogger <COMMAND>. Available commands: restart, dump";
+
     private @Inject KeyManager keyManager;
     private @Inject EventBus eventBus;
     private @Inject Client client;
@@ -76,12 +78,11 @@ public class ActionLoggerPlugin extends Plugin {
 
     @Subscribe
     public void onCommandExecuted(CommandExecuted event) {
-        var usage = "Usage: ::ActionLogger <COMMAND>. Available commands: restart, dump";
         var cmd = event.getCommand();
         var args = event.getArguments();
         if ("ActionLogger".equalsIgnoreCase(cmd) || "ActLog".equalsIgnoreCase(cmd)) {
             if (args == null || args.length == 0) {
-                this.addChatMessage(usage);
+                this.addChatMessage(USAGE);
                 return;
             }
 
@@ -99,7 +100,7 @@ public class ActionLoggerPlugin extends Plugin {
 
                 default:
                     this.addChatMessage(String.format("Unknown command %s", args[0]));
-                    this.addChatMessage(usage);
+                    this.addChatMessage(USAGE);
                     break;
             }
         }
