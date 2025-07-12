@@ -193,3 +193,56 @@ To invoke a command, type `::ActionLogger <COMMAND>` or `::ActLog <COMMAND>` wit
 Ends the logging of the current file and starts logging to a new file.
 
 Example: `::actlog restart`
+
+### Dump
+
+Dumps all nearby objects, ground items, and npcs to the Action Logger file. Coordinates are all scene-relative
+
+To dump everything: `::actlog dump`
+To dump NPCs only: `::actlog dump npcs`
+To dump NPCs and ground items only: `::actlog dump npcs grounditems`
+
+Example output:
+```json
+{
+  "tick": 1449,
+  "ts": "2025-07-12T14:08:59Z",
+  "type": "DUMP",
+  "data": {
+    "scene": {
+      "baseX": 3152,
+      "baseY": 3160,
+      "isInstance": false
+    },
+    "worldViewPlane": 1,
+    "groundItems": [
+      {
+        "x": 42,
+        "y": 41,
+        "z": 0,
+        "id": 526,
+        "name": "Bones",
+        "quantity": 1
+      }
+    ],
+    "objects": [
+      {
+        "x": 1,
+        "y": 1,
+        "z": 0,
+        "id": 4737,
+        "type": "GROUND"
+      }
+    ],
+    "npcs": [
+      {
+        "x": 56,
+        "y": 60,
+        "z": 1,
+        "id": 3106,
+        "name": "Man"
+      }
+    ]
+  }
+}
+```

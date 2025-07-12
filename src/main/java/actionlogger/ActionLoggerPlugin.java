@@ -14,6 +14,7 @@ import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ClientShutdown;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -31,6 +32,7 @@ public class ActionLoggerPlugin extends Plugin {
     private @Inject Gson gson;
     private @Inject ScheduledExecutorService executor;
     private @Inject ChatMessageManager chatManager;
+    private @Inject ItemManager itemManager;
 
     private DialogueTracker dialogueTracker = null;
     private VarTracker varTracker = null;
@@ -74,7 +76,7 @@ public class ActionLoggerPlugin extends Plugin {
 
     @Subscribe
     public void onCommandExecuted(CommandExecuted event) {
-        var usage = "Usage: ::ActionLogger <COMMAND>. Available commands: restart";
+        var usage = "Usage: ::ActionLogger <COMMAND>. Available commands: restart, dump";
         var cmd = event.getCommand();
         var args = event.getArguments();
         if ("ActionLogger".equalsIgnoreCase(cmd) || "ActLog".equalsIgnoreCase(cmd)) {
@@ -89,6 +91,10 @@ public class ActionLoggerPlugin extends Plugin {
                     this.writer.restartFile();
                     var newPath = this.writer.getPath();
                     this.addChatMessage(String.format("Closed file at %s, now writing to %s", oldPath, newPath));
+                    break;
+
+                case "dump":
+                    Dump.handleDump(this, this.client, this.writer, this.itemManager, args);
                     break;
 
                 default:
