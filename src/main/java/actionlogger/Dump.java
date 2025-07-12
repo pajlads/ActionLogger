@@ -40,7 +40,10 @@ public class Dump {
 
         var sceneData = new SceneData(scene.getBaseX(), scene.getBaseY(), scene.isInstance());
         List<GroundItemData> groundItemData = new ArrayList<>();
-        List<ObjectData> objectData = new ArrayList<>();
+        List<ObjectData> decorativeObjectData = new ArrayList<>();
+        List<ObjectData> wallObjectData = new ArrayList<>();
+        List<ObjectData> gameObjectData = new ArrayList<>();
+        List<ObjectData> groundObjectData = new ArrayList<>();
         List<NPCData> npcData = new ArrayList<>();
         var tiles = scene.getTiles();
         for (var z = 0; z < tiles.length; z++) {
@@ -62,24 +65,24 @@ public class Dump {
 
                     var decorativeObjects = tile.getDecorativeObject();
                     if (decorativeObjects != null) {
-                        objectData.add(new ObjectData(x, y, z, decorativeObjects.getId(), "DECORATIVE"));
+                        decorativeObjectData.add(new ObjectData(x, y, z, decorativeObjects.getId()));
                     }
 
                     var groundObject = tile.getGroundObject();
                     if (groundObject != null) {
-                        objectData.add(new ObjectData(x, y, z, groundObject.getId(), "GROUND"));
+                        groundObjectData.add(new ObjectData(x, y, z, groundObject.getId()));
                     }
 
                     var wallObject = tile.getWallObject();
                     if (wallObject != null) {
-                        objectData.add(new ObjectData(x, y, z, wallObject.getId(), "WALL"));
+                        wallObjectData.add(new ObjectData(x, y, z, wallObject.getId()));
                     }
 
                     var gameObjects = tile.getGameObjects();
                     if (gameObjects != null) {
                         for (var gameObject : gameObjects) {
                             if (gameObject != null) {
-                                objectData.add(new ObjectData(x, y, z, gameObject.getId(), "GAME"));
+                                gameObjectData.add(new ObjectData(x, y, z, gameObject.getId()));
                             }
                         }
                     }
@@ -96,7 +99,10 @@ public class Dump {
             sceneData,
             worldView.getPlane(),
             dumps.contains("grounditems") ? groundItemData : null,
-            dumps.contains("objects") ? objectData : null,
+            dumps.contains("objects") ? decorativeObjectData : null,
+            dumps.contains("objects") ? wallObjectData : null,
+            dumps.contains("objects") ? gameObjectData : null,
+            dumps.contains("objects") ? groundObjectData : null,
             dumps.contains("npcs") ? npcData : null
         );
 
@@ -129,7 +135,6 @@ public class Dump {
         private final int z;
 
         private final int id;
-        private final String type;
     }
 
     @Data
@@ -148,7 +153,10 @@ public class Dump {
         private final int worldViewPlane;
 
         private final @Nullable List<GroundItemData> groundItems;
-        private final @Nullable List<ObjectData> objects;
+        private final @Nullable List<ObjectData> decorativeObjects;
+        private final @Nullable List<ObjectData> wallObjects;
+        private final @Nullable List<ObjectData> gameObjects;
+        private final @Nullable List<ObjectData> groundObjects;
         private final @Nullable List<NPCData> npcs;
     }
 }
