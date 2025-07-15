@@ -25,8 +25,10 @@ public class JsonWriter implements Closeable {
     private final ExecutorService executor;
     private final File dir;
     @Getter
-    private @Nullable Path path = null;
-    private @Nullable BufferedWriter fh = null;
+    @Nullable
+    private volatile Path path = null;
+    private volatile BufferedWriter fh = null;
+    private volatile boolean writing = false;
 
     public JsonWriter(Gson gson, Client client, ExecutorService executor) {
         this.gson = gson;
@@ -41,15 +43,17 @@ public class JsonWriter implements Closeable {
     }
 
     public void restartFile() {
-        if (this.fh != null) {
-            this.close();
-        }
-
-        this.path = dir.toPath().resolve(String.format("%d-logs.txt", System.currentTimeMillis()));
+        var oldFh = this.fh;
+        var path = dir.toPath().resolve(String.format("%d-logs.txt", System.currentTimeMillis()));
         try {
-            this.fh = Files.newBufferedWriter(this.path);
+            this.fh = Files.newBufferedWriter(path);
+            this.path = path;
+
+            if (oldFh != null) {
+                oldFh.close();
+            }
         } catch (IOException e) {
-            log.warn("Could not create file at {}", this.path);
+            log.warn("Could not cleanly create file at {}", path, e);
         }
     }
 
@@ -58,14 +62,17 @@ public class JsonWriter implements Closeable {
             return;
         }
         var payload = new Payload(this.client.getTickCount(), Utils.getTimestamp(), type, data);
-        var currentFh = this.fh;
         executor.execute(() -> {
+            this.writing = true;
             try {
-                currentFh.write(gson.toJson(payload));
-                currentFh.newLine();
-                currentFh.flush();
+                var fh = this.fh;
+                fh.write(gson.toJson(payload));
+                fh.newLine();
+                fh.flush();
             } catch (IOException e) {
-                log.warn("Failed to write ActionLogger data: {}", e.getMessage());
+                log.warn("Failed to write ActionLogger data", e);
+            } finally {
+                this.writing = false;
             }
         });
     }
@@ -80,14 +87,17 @@ public class JsonWriter implements Closeable {
         var currentPath = this.path;
 
         this.fh = null;
+        this.path = null;
 
-        executor.execute(() -> {
-            try {
-                currentFh.close();
-            } catch (IOException e) {
-                log.warn("Failed to close file at {}", currentPath);
-            }
-        });
+        while (this.writing) {
+            Thread.onSpinWait(); // busy wait for existing write operation to complete before closing writer
+        }
+
+        try {
+            currentFh.close();
+        } catch (IOException e) {
+            log.warn("Failed to close file at {}", currentPath, e);
+        }
     }
 
     @Value
