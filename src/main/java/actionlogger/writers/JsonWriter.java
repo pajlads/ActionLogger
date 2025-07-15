@@ -68,6 +68,10 @@ public class JsonWriter implements Closeable {
             this.writing = true;
             try {
                 var fh = this.fh;
+                if (fh == null) {
+                    log.debug("Skipping write due to closed resource: {}", payload);
+                    return;
+                }
                 fh.write(gson.toJson(payload));
                 fh.newLine();
                 fh.flush();
