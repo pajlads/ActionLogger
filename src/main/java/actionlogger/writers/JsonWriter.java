@@ -14,6 +14,7 @@ import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
@@ -44,16 +45,17 @@ public class JsonWriter implements Closeable {
 
     public void restartFile() {
         var oldFh = this.fh;
+        var oldPath = this.path;
         var path = dir.toPath().resolve(String.format("%d-logs.txt", System.currentTimeMillis()));
         try {
             this.fh = Files.newBufferedWriter(path);
             this.path = path;
 
             if (oldFh != null) {
-                oldFh.close();
+                closePostWrite(oldFh, oldPath);
             }
         } catch (IOException e) {
-            log.warn("Could not cleanly create file at {}", path, e);
+            log.warn("Could not create file at {}", path, e);
         }
     }
 
@@ -89,12 +91,16 @@ public class JsonWriter implements Closeable {
         this.fh = null;
         this.path = null;
 
+        closePostWrite(currentFh, currentPath);
+    }
+
+    private void closePostWrite(Writer w, Path currentPath) {
         while (this.writing) {
             Thread.onSpinWait(); // busy wait for existing write operation to complete before closing writer
         }
 
         try {
-            currentFh.close();
+            w.close();
         } catch (IOException e) {
             log.warn("Failed to close file at {}", currentPath, e);
         }
