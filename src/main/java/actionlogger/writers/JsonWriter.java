@@ -87,10 +87,6 @@ public class JsonWriter implements Closeable {
 
     @Override
     public void close() {
-        if (this.fh == null) {
-            return;
-        }
-
         executor.execute(() -> {
             var currentFh = this.fh;
             if (currentFh == null) {
