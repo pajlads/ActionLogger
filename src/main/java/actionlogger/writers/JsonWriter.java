@@ -68,20 +68,17 @@ public class JsonWriter implements Closeable {
     }
 
     public void write(@Nonnull String type, @Nonnull Object data) {
-        if (this.fh == null) {
-            return;
-        }
         var payload = new Payload(this.client.getTickCount(), Utils.getTimestamp(), type, data);
         executor.execute(() -> {
-            var fh = this.fh;
-            if (fh == null) {
+            var currentFh = this.fh;
+            if (currentFh == null) {
                 log.debug("Skipping write due to closed resource: {}", payload);
                 return;
             }
             try {
-                fh.write(gson.toJson(payload));
-                fh.newLine();
-                fh.flush();
+                currentFh.write(gson.toJson(payload));
+                currentFh.newLine();
+                currentFh.flush();
             } catch (IOException e) {
                 log.warn("Failed to write ActionLogger data", e);
             }
