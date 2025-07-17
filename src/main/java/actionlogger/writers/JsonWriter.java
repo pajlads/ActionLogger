@@ -2,21 +2,21 @@ package actionlogger.writers;
 
 import actionlogger.Utils;
 import com.google.gson.Gson;
-import lombok.Getter;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.client.RuneLite;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
@@ -25,11 +25,8 @@ public class JsonWriter implements Closeable {
     private final Client client;
     private final ExecutorService executor;
     private final File dir;
-    @Getter
-    @Nullable
-    private volatile Path path = null;
-    private volatile BufferedWriter fh = null;
-    private volatile boolean writing = false;
+    private Path path = null;
+    private BufferedWriter fh = null;
 
     public JsonWriter(Gson gson, Client client, ExecutorService executor) {
         this.gson = gson;
@@ -43,20 +40,31 @@ public class JsonWriter implements Closeable {
         this.restartFile();
     }
 
-    public void restartFile() {
-        var oldFh = this.fh;
-        var oldPath = this.path;
-        var path = dir.toPath().resolve(String.format("%d-logs.txt", System.currentTimeMillis()));
-        try {
-            this.fh = Files.newBufferedWriter(path);
-            this.path = path;
+    public CompletableFuture<Map.Entry<Path, Path>> restartFile() {
+        CompletableFuture<Map.Entry<Path, Path>> future = new CompletableFuture<>();
+        executor.execute(() -> {
+            var oldFh = this.fh;
+            var oldPath = this.path;
+            var path = dir.toPath().resolve(String.format("%d-logs.txt", System.currentTimeMillis()));
+            try {
+                this.fh = Files.newBufferedWriter(path);
+                this.path = path;
 
-            if (oldFh != null) {
-                closePostWrite(oldFh, oldPath);
+                if (oldFh != null) {
+                    try {
+                        oldFh.close();
+                    } catch (IOException e) {
+                        log.warn("Failed to close old writer for {}", oldPath, e);
+                    }
+                }
+
+                future.complete(Pair.of(oldPath, path));
+            } catch (IOException e) {
+                log.warn("Could not create file at {}", path, e);
+                future.completeExceptionally(e);
             }
-        } catch (IOException e) {
-            log.warn("Could not create file at {}", path, e);
-        }
+        });
+        return future;
     }
 
     public void write(@Nonnull String type, @Nonnull Object data) {
@@ -65,20 +73,17 @@ public class JsonWriter implements Closeable {
         }
         var payload = new Payload(this.client.getTickCount(), Utils.getTimestamp(), type, data);
         executor.execute(() -> {
-            this.writing = true;
+            var fh = this.fh;
+            if (fh == null) {
+                log.debug("Skipping write due to closed resource: {}", payload);
+                return;
+            }
             try {
-                var fh = this.fh;
-                if (fh == null) {
-                    log.debug("Skipping write due to closed resource: {}", payload);
-                    return;
-                }
                 fh.write(gson.toJson(payload));
                 fh.newLine();
                 fh.flush();
             } catch (IOException e) {
                 log.warn("Failed to write ActionLogger data", e);
-            } finally {
-                this.writing = false;
             }
         });
     }
@@ -89,25 +94,21 @@ public class JsonWriter implements Closeable {
             return;
         }
 
-        var currentFh = this.fh;
-        var currentPath = this.path;
+        executor.execute(() -> {
+            var currentFh = this.fh;
+            if (currentFh == null) {
+                return;
+            }
+            var currentPath = this.path;
 
-        this.fh = null;
-        this.path = null;
-
-        closePostWrite(currentFh, currentPath);
-    }
-
-    private void closePostWrite(Writer w, Path currentPath) {
-        while (this.writing) {
-            Thread.onSpinWait(); // busy wait for existing write operation to complete before closing writer
-        }
-
-        try {
-            w.close();
-        } catch (IOException e) {
-            log.warn("Failed to close file at {}", currentPath, e);
-        }
+            try {
+                currentFh.close();
+                this.fh = null;
+                this.path = null;
+            } catch (IOException e) {
+                log.warn("Failed to close file at {}", currentPath, e);
+            }
+        });
     }
 
     @Value
