@@ -88,10 +88,16 @@ public class ActionLoggerPlugin extends Plugin {
 
             switch (args[0].toLowerCase()) {
                 case "restart":
-                    var oldPath = this.writer.getPath();
-                    this.writer.restartFile();
-                    var newPath = this.writer.getPath();
-                    this.addChatMessage(String.format("Closed file at %s, now writing to %s", oldPath, newPath));
+                    this.writer.restartFile()
+                        .thenAccept(result -> {
+                            var oldPath = result.getKey();
+                            var newPath = result.getValue();
+                            this.addChatMessage(String.format("Closed file at %s, now writing to %s", oldPath, newPath));
+                        })
+                        .exceptionally(e -> {
+                            this.addChatMessage("Failed to rotate files; try again later or report to our issue tracker");
+                            return null;
+                        });
                     break;
 
                 case "dump":
