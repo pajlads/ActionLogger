@@ -1,5 +1,6 @@
 package actionlogger;
 
+import actionlogger.trackers.AnimationTracker;
 import actionlogger.trackers.DialogueTracker;
 import actionlogger.trackers.InventoryTracker;
 import actionlogger.trackers.VarTracker;
@@ -39,6 +40,7 @@ public class ActionLoggerPlugin extends Plugin {
     private DialogueTracker dialogueTracker = null;
     private VarTracker varTracker = null;
     private InventoryTracker inventoryTracker = null;
+    private AnimationTracker animationTracker = null;
     private JsonWriter writer = null;
 
     @Override
@@ -54,6 +56,9 @@ public class ActionLoggerPlugin extends Plugin {
 
         inventoryTracker = new InventoryTracker(writer);
         eventBus.register(inventoryTracker);
+        
+        animationTracker = new AnimationTracker(writer, client);
+        eventBus.register(animationTracker);
 
         log.debug("Started up Action Logger");
     }
@@ -69,6 +74,9 @@ public class ActionLoggerPlugin extends Plugin {
 
         eventBus.unregister(inventoryTracker);
         inventoryTracker = null;
+        
+        eventBus.unregister(animationTracker);
+        animationTracker = null;
 
         writer.close();
         writer = null;

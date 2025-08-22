@@ -182,6 +182,35 @@ Fires when the player's inventory changes
 }
 ```
 
+### ANIMATION_PLAYER_CHANGED
+
+```json5
+{
+  "tick": 814,
+  "ts": "2025-08-22T07:04:05Z",
+  "type": "ANIMATION_PLAYER_CHANGED",
+  "data": {
+    "animation": 2585,
+    "poseAnimation": 813,
+    "oldAnimation": 2583,
+    "oldPoseAnimation": 813,
+    "playerPosition": {
+      "x": 3218,
+      "y": 3399,
+      "plane": 3
+    },
+    "interactionId": 14834,
+    "interactionMenuOption": "Leap",
+    "interactionMenuTarget": "<col=ffff>Gap",
+    "interactionPosition": {
+      "x": 3213,
+      "y": 3414,
+      "plane": 3
+    }
+  }
+}
+```
+
 ## Chat commands
 
 There are various helpful chat commands available when the Action Logger plugin is installed.
