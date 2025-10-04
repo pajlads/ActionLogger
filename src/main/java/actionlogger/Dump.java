@@ -2,22 +2,28 @@ package actionlogger;
 
 import actionlogger.writers.JsonWriter;
 import lombok.Data;
+import lombok.Value;
 import net.runelite.api.Client;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.game.ItemManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Dump {
     public static void handleDump(@Nonnull ActionLoggerPlugin plugin, @Nonnull Client client, @Nonnull JsonWriter writer, @Nonnull ItemManager itemManager, @Nonnull String[] args) {
+        assert (client.isClientThread());
+
         var dumps = new HashSet<String>();
         // default dump everything
         dumps.add("grounditems");
         dumps.add("objects");
         dumps.add("npcs");
+        dumps.add("widgets");
 
         if (args.length > 1) {
             dumps.clear();
@@ -95,6 +101,12 @@ public class Dump {
             npcData.add(new NPCData(localLocation.getSceneX(), localLocation.getSceneY(), worldView.getPlane(), npc.getId(), npc.getName()));
         }
 
+        var widgets = new ArrayList<WidgetData>();
+
+        for (var widgetRoot : client.getWidgetRoots()) {
+            var widgetData = WidgetData.from(widgetRoot);
+        }
+
         var dumpData = new DumpData(
             sceneData,
             worldView.getPlane(),
@@ -145,6 +157,43 @@ public class Dump {
 
         private final int id;
         private final String name;
+    }
+
+    @Value
+    private static class WidgetData {
+        int id;
+        int type;
+        int contentType;
+        int parentId;
+        String text;
+        String name;
+        int itemID;
+        int modelID;
+        int spriteID;
+        Rectangle bounds;
+        boolean hidden;
+        List<WidgetData> dynamicChildren;
+        List<WidgetData> staticChildren;
+        List<WidgetData> nestedChildren;
+
+        public static WidgetData from(@Nonnull Widget w) {
+            return new WidgetData(
+                w.getId(),
+                w.getType(),
+                w.getContentType(),
+                w.getParentId(),
+                w.getText(),
+                w.getName(),
+                w.getItemId(),
+                w.getModelId(),
+                w.getSpriteId(),
+                w.getBounds(),
+                w.isHidden(),
+                Arrays.stream(w.getDynamicChildren()).filter(Objects::nonNull).map(WidgetData::from).collect(Collectors.toList()),
+                Arrays.stream(w.getStaticChildren()).filter(Objects::nonNull).map(WidgetData::from).collect(Collectors.toList()),
+                Arrays.stream(w.getNestedChildren()).filter(Objects::nonNull).map(WidgetData::from).collect(Collectors.toList())
+            );
+        }
     }
 
     @Data
