@@ -9,9 +9,12 @@ import net.runelite.client.game.ItemManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.awt.*;
-import java.util.*;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Dump {
@@ -105,6 +108,7 @@ public class Dump {
 
         for (var widgetRoot : client.getWidgetRoots()) {
             var widgetData = WidgetData.from(widgetRoot);
+            widgets.add(widgetData);
         }
 
         var dumpData = new DumpData(
@@ -115,7 +119,8 @@ public class Dump {
             dumps.contains("objects") ? wallObjectData : null,
             dumps.contains("objects") ? gameObjectData : null,
             dumps.contains("objects") ? groundObjectData : null,
-            dumps.contains("npcs") ? npcData : null
+            dumps.contains("npcs") ? npcData : null,
+            dumps.contains("widgets") ? widgets : null
         );
 
         writer.write("DUMP", dumpData);
@@ -167,9 +172,9 @@ public class Dump {
         int parentId;
         String text;
         String name;
-        int itemID;
-        int modelID;
-        int spriteID;
+        Integer itemID;
+        Integer modelID;
+        Integer spriteID;
         Rectangle bounds;
         boolean hidden;
         List<WidgetData> dynamicChildren;
@@ -177,21 +182,26 @@ public class Dump {
         List<WidgetData> nestedChildren;
 
         public static WidgetData from(@Nonnull Widget w) {
+            var bounds = w.getBounds();
+            boolean emptyBounds = bounds.getWidth() == 0 && bounds.getHeight() == 0 && bounds.getX() == -1 && bounds.getY() == -1;
+            var dynamicChildren = Arrays.stream(w.getDynamicChildren()).filter(Objects::nonNull).map(WidgetData::from).collect(Collectors.toList());
+            var staticChildren = Arrays.stream(w.getStaticChildren()).filter(Objects::nonNull).map(WidgetData::from).collect(Collectors.toList());
+            var nestedChildren = Arrays.stream(w.getNestedChildren()).filter(Objects::nonNull).map(WidgetData::from).collect(Collectors.toList());
             return new WidgetData(
                 w.getId(),
                 w.getType(),
                 w.getContentType(),
                 w.getParentId(),
-                w.getText(),
-                w.getName(),
-                w.getItemId(),
-                w.getModelId(),
-                w.getSpriteId(),
-                w.getBounds(),
+                w.getText() == null || w.getText().isEmpty() ? null : w.getText(),
+                w.getName() == null || w.getName().isEmpty() ? null : w.getName(),
+                w.getItemId() >= 0 ? w.getItemId() : null,
+                w.getModelId() >= 0 ? w.getModelId() : null,
+                w.getSpriteId() >= 0 ? w.getSpriteId() : null,
+                emptyBounds ? null : w.getBounds(),
                 w.isHidden(),
-                Arrays.stream(w.getDynamicChildren()).filter(Objects::nonNull).map(WidgetData::from).collect(Collectors.toList()),
-                Arrays.stream(w.getStaticChildren()).filter(Objects::nonNull).map(WidgetData::from).collect(Collectors.toList()),
-                Arrays.stream(w.getNestedChildren()).filter(Objects::nonNull).map(WidgetData::from).collect(Collectors.toList())
+                dynamicChildren.isEmpty() ? null : dynamicChildren,
+                staticChildren.isEmpty() ? null : staticChildren,
+                nestedChildren.isEmpty() ? null : nestedChildren
             );
         }
     }
@@ -207,5 +217,6 @@ public class Dump {
         private final @Nullable List<ObjectData> gameObjects;
         private final @Nullable List<ObjectData> groundObjects;
         private final @Nullable List<NPCData> npcs;
+        private final @Nullable List<WidgetData> widgets;
     }
 }
