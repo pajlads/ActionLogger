@@ -43,7 +43,7 @@ dependencies {
 }
 
 group = "actionlogger"
-version = "0.1.7"
+version = "0.1.8"
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
