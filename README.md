@@ -225,10 +225,11 @@ Example: `::actlog restart`
 
 ### Dump
 
-Dumps all nearby objects, ground items, and npcs to the Action Logger file. Coordinates are all scene-relative
+Dumps all nearby objects, ground items, npcs, and widgets to the Action Logger file. Coordinates are all scene-relative
 
 To dump everything: `::actlog dump`
 To dump NPCs only: `::actlog dump npcs`
+To dump widgets only: `::actlog dump widgets`
 To dump NPCs and ground items only: `::actlog dump npcs grounditems`
 
 Example output:
@@ -294,6 +295,21 @@ Example output:
         "z": 0,
         "id": 1838,
         "name": "Duck"
+      }
+    ],
+    "widgets": [
+      {
+        "id": 10747904,
+        "type": 0,
+        "contentType": 0,
+        "parentId": -1,
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 1217,
+          "height": 705
+        },
+        "hidden": false
       }
     ]
   }
