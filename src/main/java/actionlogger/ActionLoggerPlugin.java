@@ -1,9 +1,6 @@
 package actionlogger;
 
-import actionlogger.trackers.AnimationTracker;
-import actionlogger.trackers.DialogueTracker;
-import actionlogger.trackers.InventoryTracker;
-import actionlogger.trackers.VarTracker;
+import actionlogger.trackers.*;
 import actionlogger.writers.JsonWriter;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +38,7 @@ public class ActionLoggerPlugin extends Plugin {
     private VarTracker varTracker = null;
     private InventoryTracker inventoryTracker = null;
     private AnimationTracker animationTracker = null;
+    private ChatTracker chatTracker = null;
     private JsonWriter writer = null;
 
     @Override
@@ -56,9 +54,12 @@ public class ActionLoggerPlugin extends Plugin {
 
         inventoryTracker = new InventoryTracker(writer);
         eventBus.register(inventoryTracker);
-        
+
         animationTracker = new AnimationTracker(writer, client);
         eventBus.register(animationTracker);
+
+        chatTracker = new ChatTracker(writer);
+        eventBus.register(chatTracker);
 
         log.debug("Started up Action Logger");
     }
@@ -74,9 +75,12 @@ public class ActionLoggerPlugin extends Plugin {
 
         eventBus.unregister(inventoryTracker);
         inventoryTracker = null;
-        
+
         eventBus.unregister(animationTracker);
         animationTracker = null;
+
+        eventBus.unregister(chatTracker);
+        chatTracker = null;
 
         writer.close();
         writer = null;
