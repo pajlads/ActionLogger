@@ -211,6 +211,38 @@ Fires when the player's inventory changes
 }
 ```
 
+### CHAT
+
+Examine
+
+```json5
+{
+  "tick": 406,
+  "ts": "2026-07-31T10:35:39Z",
+  "type": "CHAT",
+  "data": {
+    "type": "ITEM_EXAMINE",
+    "name": "",
+    "message": "Deceptively pie shaped."
+  }
+}
+```
+
+Game message
+
+```json5
+{
+  "tick": 1591,
+  "ts": "2026-07-31T10:47:30Z",
+  "type": "CHAT",
+  "data": {
+    "type": "GAMEMESSAGE",
+    "name": "",
+    "message": "Your reward is: <col=ff0000>1</col> x <col=ff0000>Book of knowledge</col>."
+  }
+}
+```
+
 ## Chat commands
 
 There are various helpful chat commands available when the Action Logger plugin is installed.
