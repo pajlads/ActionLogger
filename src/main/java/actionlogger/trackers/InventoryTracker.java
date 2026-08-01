@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2024 pajlada <rasmus.karlsson@pajlada.com>
+// SPDX-FileCopyrightText: 2025 iProdigy <gitprodigy@proton.me>
+//
+// SPDX-License-Identifier: BSD-2-Clause
+
 package actionlogger.trackers;
 
 import actionlogger.writers.JsonWriter;

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 pajlada <rasmus.karlsson@pajlada.com>
+//
+// SPDX-License-Identifier: BSD-2-Clause
+
 package actionlogger.trackers;
 
 import actionlogger.writers.JsonWriter;

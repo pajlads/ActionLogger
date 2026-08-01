@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 pajlada <rasmus.karlsson@pajlada.com>
+//
+// SPDX-License-Identifier: BSD-2-Clause
+
 package actionlogger;
 
 import net.runelite.client.RuneLite;

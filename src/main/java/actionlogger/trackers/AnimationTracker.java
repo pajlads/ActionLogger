@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Skretzo <53493631+Skretzo@users.noreply.github.com>
+//
+// SPDX-License-Identifier: BSD-2-Clause
+
 package actionlogger.trackers;
 
 import actionlogger.writers.JsonWriter;
